@@ -5,6 +5,7 @@
 #include <QMainWindow>
 
 #include "psvrthread.h"
+#include "videoplayer.h"
 
 namespace Ui
 {
@@ -24,6 +25,8 @@ class MainWindow : public QMainWindow
 		Ui::MainWindow *ui;
 
 		PSVRThread *psvr_thread;
+
+		VideoPlayer *video_player;
 
 	protected slots:
 		void PSVRAcceleration(short x, short y, short z);

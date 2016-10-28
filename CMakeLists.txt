@@ -16,6 +16,9 @@ find_package(OpenGL REQUIRED)
 find_package(HIDAPI REQUIRED)
 include_directories(${HIDAPI_INCLUDE_DIRS})
 
+find_package(LIBVLC REQUIRED)
+include_directories(${LIBVLC_INCLUDE_DIR})
+
 
 set(SOURCE_FILES
 		main.cpp
@@ -27,7 +30,7 @@ set(SOURCE_FILES
 		hmdwindow.cpp
 		hmdwindow.h
 		hmdwidget.cpp
-		hmdwidget.h)
+		hmdwidget.h videoplayer.cpp videoplayer.h)
 
 set(UI_FILES
 		mainwindow.ui)
@@ -37,4 +40,5 @@ add_executable(psvr ${SOURCE_FILES} ${UI_FILES})
 qt5_use_modules(psvr Core Widgets Gui)
 target_link_libraries(psvr ${HIDAPI_LIBRARIES})
 target_link_libraries(psvr ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
+target_link_libraries(psvr ${LIBVLC_LIBRARY})
 

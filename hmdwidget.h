@@ -6,6 +6,8 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
+#include <QOpenGLTexture>
+#include "videoplayer.h"
 
 class HMDWidget : public QOpenGLWidget
 {
@@ -14,6 +16,8 @@ class HMDWidget : public QOpenGLWidget
 	public:
 		HMDWidget(QWidget *parent = 0);
 		~HMDWidget();
+
+		void SetVideoPlayer(VideoPlayer *video_player);
 
 	protected:
 		void initializeGL() Q_DECL_OVERRIDE;
@@ -26,6 +30,12 @@ class HMDWidget : public QOpenGLWidget
 
 		QOpenGLBuffer vbo;
 		QOpenGLVertexArrayObject vao;
+
+		QOpenGLTexture *video_tex;
+
+
+		VideoPlayer *video_player;
+
 
 		void RenderEye(int eye);
 

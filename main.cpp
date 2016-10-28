@@ -6,6 +6,9 @@
 
 int main(int argc, char *argv[])
 {
+	QSurfaceFormat format;
+	QSurfaceFormat::setDefaultFormat(format);
+
 	QApplication app(argc, argv);
 
 	MainWindow main_window;

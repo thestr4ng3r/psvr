@@ -18,10 +18,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	psvr_thread = new PSVRThread(this);
 	connect(psvr_thread, SIGNAL(PSVRAcceleration(short, short, short)), this, SLOT(PSVRAcceleration(short, short, short)));
 	psvr_thread->start();
+
+	video_player = new VideoPlayer(512, 512);
+	video_player->PlayVideo("test.mp4");
 }
 
 MainWindow::~MainWindow()
 {
+	delete video_player;
 	psvr.Close();
 	delete ui;
 }
