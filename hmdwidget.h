@@ -22,6 +22,7 @@ class HMDWidget : public QOpenGLWidget
 
 	private:
 		QOpenGLShaderProgram *test_shader;
+		GLint modelview_projection_uni;
 
 		QOpenGLBuffer vbo;
 		QOpenGLVertexArrayObject vao;

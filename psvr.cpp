@@ -4,6 +4,7 @@
 #include <hidapi/hidapi.h>
 #include <cstdint>
 #include <cstring>
+#include <zconf.h>
 
 #include "psvr.h"
 
@@ -68,6 +69,12 @@ void PSVR::Close()
 
 void PSVR::Read()
 {
+	if(!psvr_device)
+	{
+		sleep(1);
+		return;
+	}
+
 	int size = hid_read(psvr_device, buffer, PSVR_BUFFER_SIZE);
 
 	x_acc = read_int16(buffer, 20) + read_int16(buffer, 36);

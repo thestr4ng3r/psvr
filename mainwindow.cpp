@@ -1,13 +1,11 @@
 
 #include <QTimer>
-#include <QString>
 #include <QThreadPool>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 #include "psvr.h"
-#include "psvrthread.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -20,8 +18,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	psvr_thread = new PSVRThread(this);
 	connect(psvr_thread, SIGNAL(PSVRAcceleration(short, short, short)), this, SLOT(PSVRAcceleration(short, short, short)));
 	psvr_thread->start();
-
-
 }
 
 MainWindow::~MainWindow()

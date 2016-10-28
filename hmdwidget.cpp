@@ -15,10 +15,60 @@ HMDWidget::~HMDWidget()
 	delete test_shader;
 }
 
-static const QVector3D sg_vertices[] = {
-		QVector3D( 0.00f,  0.75f, 1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D( 0.75f, -0.75f, 1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D(-0.75f, -0.75f, 1.0f), QVector3D(0.0f, 0.0f, 1.0f)
+static const QVector3D cube_vertices[] = {
+		// back
+		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D( -1.0f, -1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+
+		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D(  1.0f,  1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+
+		// front
+		QVector3D(  1.0f,  1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D(  1.0f, -1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D( -1.0f, -1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+
+		QVector3D( -1.0f, -1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D( -1.0f,  1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D(  1.0f,  1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+
+		// left
+		QVector3D( -1.0f,  1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D( -1.0f, -1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D( -1.0f, -1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+
+		QVector3D( -1.0f, -1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D( -1.0f,  1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+
+		// right
+		QVector3D(  1.0f,  1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D(  1.0f, -1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+
+		QVector3D(  1.0f, -1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D(  1.0f,  1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D(  1.0f,  1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+
+		// top
+		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D(  1.0f,  1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D(  1.0f,  1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+
+		QVector3D(  1.0f,  1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D( -1.0f,  1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+
+		// bottom
+		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D( -1.0f, -1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D( -1.0f, -1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+
+		QVector3D( -1.0f, -1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D(  1.0f, -1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f)
 	};
 
 void HMDWidget::initializeGL()
@@ -31,11 +81,12 @@ void HMDWidget::initializeGL()
 	test_shader->bind();
 	test_shader->bindAttributeLocation("vertex_attr", 0);
 	test_shader->bindAttributeLocation("color_attr", 1);
+	//modelview_projection_uni = test_shader->uniformLocation("modelview_projection_uni");
 
 	vbo.create();
 	vbo.bind();
 	vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-	vbo.allocate(sg_vertices, sizeof(sg_vertices));
+	vbo.allocate(cube_vertices, sizeof(cube_vertices));
 
 	vao.create();
 	vao.bind();
@@ -61,18 +112,29 @@ void HMDWidget::paintGL()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glViewport(0, 0, w/2, h);
+	glViewport(0, 0, w, h);
 	RenderEye(0);
 
-	glViewport(w/2, 0, w/2, h);
-	RenderEye(1);
+	//glViewport(w/2, 0, w/2, h);
+	//RenderEye(1);
 }
 
 void HMDWidget::RenderEye(int eye)
 {
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+
 	test_shader->bind();
+
+	QMatrix4x4 modelview_matrix;
+	modelview_matrix.lookAt(QVector3D(2.0f, 2.0f, 2.0f), QVector3D(0.0f, 0.0f, 0.0f), QVector3D(0.0f, 1.0f, 0.0f));
+
+	QMatrix4x4 projection_matrix;
+	projection_matrix.perspective(80.0f, (float)width() / (float)height(), 0.1f, 100.0f);
+	test_shader->setUniformValue("modelview_projection_uni", projection_matrix * modelview_matrix);
+
 	vao.bind();
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 	vao.release();
 	test_shader->release();
 }
