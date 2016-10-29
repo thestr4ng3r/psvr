@@ -1,15 +1,14 @@
 
 #include "hmdwidget.h"
 
-#include <QOpenGLContext>
-#include <QOpenGLTexture>
-
-#include <GL/gl.h>
-#include <GL/glu.h>
-
-HMDWidget::HMDWidget(QWidget *parent) : QOpenGLWidget(parent)
+HMDWidget::HMDWidget(VideoPlayer *video_player, PSVR *psvr, QWidget *parent) : QOpenGLWidget(parent)
 {
-	video_player = 0;
+	this->video_player = video_player;
+	this->psvr = psvr;
+
+	gl = 0;
+
+	test_shader = 0;
 }
 
 HMDWidget::~HMDWidget()
@@ -17,10 +16,6 @@ HMDWidget::~HMDWidget()
 	delete test_shader;
 }
 
-void HMDWidget::SetVideoPlayer(VideoPlayer *video_player)
-{
-	this->video_player = video_player;
-}
 
 static const QVector3D cube_vertices[] = {
 		// back
@@ -80,17 +75,19 @@ static const QVector3D cube_vertices[] = {
 
 
 static const QVector3D plane_vertices[] = {
-		QVector3D( -1.0f,  1.0f, 0.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D( -1.0f, -1.0f, 0.0f), QVector3D(0.0f, 0.0f, 0.0f),
-		QVector3D(  1.0f, -1.0f, 0.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(0.0f, 0.0f, 0.0f),
+		QVector3D( -1.0f, -1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
+		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(1.0f, 1.0f, 0.0f),
 
-		QVector3D(  1.0f, -1.0f, 0.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D(  1.0f,  1.0f, 0.0f), QVector3D(1.0f, 1.0f, 0.0f),
-		QVector3D( -1.0f,  1.0f, 0.0f), QVector3D(0.0f, 1.0f, 0.0f)
+		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(1.0f, 1.0f, 0.0f),
+		QVector3D(  1.0f,  1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
+		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(0.0f, 0.0f, 0.0f)
 	};
 
 void HMDWidget::initializeGL()
 {
+	gl = context()->functions();
+
 	test_shader = new QOpenGLShaderProgram(this);
 	test_shader->addShaderFromSourceFile(QOpenGLShader::Vertex, "./shader/test.vert");
 	test_shader->addShaderFromSourceFile(QOpenGLShader::Fragment, "./shader/test.frag");
@@ -120,40 +117,32 @@ void HMDWidget::initializeGL()
 	int width = 512;
 	int height = 512;
 
-	/*video_tex = new QOpenGLTexture(QOpenGLTexture::Target2D);
-	video_tex->setMinificationFilter(QOpenGLTexture::Nearest);
-	video_tex->setMagnificationFilter(QOpenGLTexture::Nearest);
+	video_tex = new QOpenGLTexture(QOpenGLTexture::Target2D);
 	video_tex->create();
-	//video_tex->bind();
-	video_tex->setFormat(QOpenGLTexture::RGB8U);
-	//video_tex->allocateStorage(QOpenGLTexture::RGB, QOpenGLTexture::UInt8);
-	video_tex->setSize(width, height, 1);
-	video_tex->allocateStorage(QOpenGLTexture::RGB, QOpenGLTexture::UInt8);
+	video_tex->setFormat(QOpenGLTexture::RGB8_UNorm);
+	video_tex->setSize(width, height);
+	video_tex->setMinMagFilters(QOpenGLTexture::Linear, QOpenGLTexture::Linear);
+	video_tex->allocateStorage(QOpenGLTexture::RGB, QOpenGLTexture::PixelType::UInt8);
+	video_tex->bind();
 
 	unsigned char *data = new unsigned char[width * height * 3];
 	for(int x=0; x<width; x++)
 	{
 		for(int y=0; y<height; y++)
 		{
-			float v = fabsf(((float)x / (float)width) * 2.0f - 1.0f)
-					  * fabsf(((float)y / (float)height) * 2.0f - 1.0f);
-			unsigned char u = (unsigned char)(v * 255.0f);
-			data[y*width + x] = 255;
-			data[y*width + x + 1] = u;
-			data[y*width + x + 2] = u;
+			data[(y*width + x) * 3 + 0] = 255;
+			data[(y*width + x) * 3 + 1] = 0;
+			data[(y*width + x) * 3 + 2] = 0;
 		}
 	}
-	video_tex->setData(QOpenGLTexture::RGB, QOpenGLTexture::UInt8, (void *)data);
-	delete[] data;*/
-
-	QImage image;
-	image.load("test.png");
-	video_tex = new QOpenGLTexture(image);
+	video_tex->setData(QOpenGLTexture::PixelFormat::RGB, QOpenGLTexture::PixelType::UInt8, (const void *)data);
+	delete[] data;
 }
 
 
 void HMDWidget::resizeGL(int w, int h)
 {
+	update();
 }
 
 void HMDWidget::paintGL()
@@ -161,35 +150,45 @@ void HMDWidget::paintGL()
 	int w = width();
 	int h = height();
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if(video_player)
+		video_tex->setData(QOpenGLTexture::PixelFormat::RGB, QOpenGLTexture::PixelType::UInt8, video_player->GetVideoData());
 
-	glViewport(0, 0, w, h);
-	RenderEye(0);
+	gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//glViewport(w/2, 0, w/2, h);
-	//RenderEye(1);
+	/*gl->glViewport(0, 0, w, h);
+	RenderEye(0, w, h);*/
+
+	gl->glViewport(0, 0, w/2, h);
+	RenderEye(0, w/2, h);
+
+	gl->glViewport(w/2, 0, w/2, h);
+	RenderEye(1, w/2, h);
+
+	update();
 }
 
-void HMDWidget::RenderEye(int eye)
+void HMDWidget::RenderEye(int eye, int width, int height)
 {
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
+	gl->glEnable(GL_CULL_FACE);
+	gl->glEnable(GL_DEPTH_TEST);
 
 	test_shader->bind();
 
 	QMatrix4x4 modelview_matrix;
-	modelview_matrix.lookAt(QVector3D(1.0f, 1.0f, 2.0f), QVector3D(0.0f, 0.0f, 0.0f), QVector3D(0.0f, 1.0f, 0.0f));
+	//modelview_matrix.lookAt(QVector3D(1.0f, 1.0f, 2.0f), QVector3D(0.0f, 0.0f, 0.0f), QVector3D(0.0f, 1.0f, 0.0f));
+	modelview_matrix.rotate(psvr->GetRotationZ(), 0.0f, 0.0f, 1.0f);
+	modelview_matrix.rotate(-psvr->GetRotationY(), 1.0f, 0.0f, 0.0f);
+	modelview_matrix.rotate(-psvr->GetRotationX(), 0.0f, 1.0f, 0.0f);
 
 	QMatrix4x4 projection_matrix;
-	projection_matrix.perspective(80.0f, (float)width() / (float)height(), 0.1f, 100.0f);
+	projection_matrix.perspective(80.0f, (float)width / (float)height, 0.1f, 100.0f);
 	test_shader->setUniformValue("modelview_projection_uni", projection_matrix * modelview_matrix);
 
-	glActiveTexture(GL_TEXTURE0);
 	test_shader->setUniformValue("tex_uni", 0);
 	video_tex->bind(0);
 
 	vao.bind();
-	glDrawArrays(GL_TRIANGLES, 0, 6*1);
+	gl->glDrawArrays(GL_TRIANGLES, 0, 6*1);
 	vao.release();
 	test_shader->release();
 }

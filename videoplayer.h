@@ -5,11 +5,15 @@
 #ifndef PSVR_VIDEOPLAYER_H
 #define PSVR_VIDEOPLAYER_H
 
+#include <QObject>
 #include <QMutex>
+
 #include <vlc/vlc.h>
 
-class VideoPlayer
+class VideoPlayer : public QObject
 {
+	Q_OBJECT
+
 	private:
 		libvlc_instance_t *libvlc;
 		libvlc_media_t *media;
@@ -20,7 +24,7 @@ class VideoPlayer
 		QMutex data_mutex;
 
 	public:
-		VideoPlayer(unsigned int width, unsigned int height);
+		VideoPlayer(QObject *parent = 0);
 		~VideoPlayer();
 
 		void PlayVideo(const char *path);
@@ -32,6 +36,9 @@ class VideoPlayer
 		void *VLC_Lock(void **p_pixels);
 		void VLC_Unlock(void *id, void *const *p_pixels);
 		void VLC_Display(void *id);
+
+	signals:
+		void DisplayVideoFrame();
 };
 
 #endif //PSVR_VIDEOPLAYER_H

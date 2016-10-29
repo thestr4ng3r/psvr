@@ -4,8 +4,9 @@
 
 #include "psvr.h"
 
-PSVRThread::PSVRThread(QObject *parent) : QThread(parent)
+PSVRThread::PSVRThread(PSVR *psvr, QObject *parent) : QThread(parent)
 {
+	this->psvr = psvr;
 }
 
 PSVRThread::~PSVRThread()
@@ -14,9 +15,16 @@ PSVRThread::~PSVRThread()
 
 void PSVRThread::run()
 {
-	while(1)
+	running = true;
+	psvr->Open();
+
+	while(running)
 	{
-		psvr.Read();
-		emit PSVRAcceleration(psvr.GetAccelerationX(), psvr.GetAccelerationY(), psvr.GetAccelerationZ());
+		while(psvr->Read())
+			emit PSVRAcceleration(psvr->GetAccelerationX(), psvr->GetAccelerationY(), psvr->GetAccelerationZ());
+
+		msleep(1);
 	}
+
+	psvr->Close();
 }

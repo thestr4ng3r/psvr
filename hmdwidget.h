@@ -7,24 +7,22 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLTexture>
+#include <QOpenGLFunctions>
+
 #include "videoplayer.h"
+#include "psvr.h"
 
 class HMDWidget : public QOpenGLWidget
 {
 	Q_OBJECT
 
-	public:
-		HMDWidget(QWidget *parent = 0);
-		~HMDWidget();
-
-		void SetVideoPlayer(VideoPlayer *video_player);
-
-	protected:
-		void initializeGL() Q_DECL_OVERRIDE;
-		void resizeGL(int w, int h) Q_DECL_OVERRIDE;
-		void paintGL() Q_DECL_OVERRIDE;
-
 	private:
+		VideoPlayer *video_player;
+		PSVR *psvr;
+
+
+		QOpenGLFunctions *gl;
+
 		QOpenGLShaderProgram *test_shader;
 		GLint modelview_projection_uni;
 
@@ -34,11 +32,16 @@ class HMDWidget : public QOpenGLWidget
 		QOpenGLTexture *video_tex;
 
 
-		VideoPlayer *video_player;
+		void RenderEye(int eye, int width, int height);
 
+	public:
+		HMDWidget(VideoPlayer *video_player, PSVR *psvr, QWidget *parent = 0);
+		~HMDWidget();
 
-		void RenderEye(int eye);
-
+	protected:
+		void initializeGL() Q_DECL_OVERRIDE;
+		void resizeGL(int w, int h) Q_DECL_OVERRIDE;
+		void paintGL() Q_DECL_OVERRIDE;
 };
 
 

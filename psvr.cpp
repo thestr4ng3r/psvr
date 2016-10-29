@@ -8,7 +8,6 @@
 
 #include "psvr.h"
 
-PSVR psvr;
 
 
 #define MAX_STR			255
@@ -55,6 +54,8 @@ void PSVR::Open()
 	r = hid_get_serial_number_string(psvr_device, wstr, MAX_STR);
 	if(r > 0)
 		printf("SN: %ls\n", wstr);
+
+	hid_set_nonblocking(psvr_device, 1);
 }
 
 
@@ -67,23 +68,34 @@ void PSVR::Close()
 	psvr_device = 0;
 }
 
-void PSVR::Read()
+bool PSVR::Read()
 {
 	if(!psvr_device)
-	{
-		sleep(1);
-		return;
-	}
+		return false;
 
 	int size = hid_read(psvr_device, buffer, PSVR_BUFFER_SIZE);
 
-	x_acc = read_int16(buffer, 20) + read_int16(buffer, 36);
-	y_acc = read_int16(buffer, 22) + read_int16(buffer, 38);
-	z_acc = read_int16(buffer, 24) + read_int16(buffer, 40);
+	if(size == 64)
+	{
+		x_acc = read_int16(buffer, 20) + read_int16(buffer, 36);
+		y_acc = read_int16(buffer, 22) + read_int16(buffer, 38);
+		z_acc = read_int16(buffer, 24) + read_int16(buffer, 40);
 
-	rot_x += x_acc * ACCELERATION_COEF;
-	rot_y += y_acc * ACCELERATION_COEF;
-	rot_z += z_acc * ACCELERATION_COEF;
+		rot_x += x_acc * ACCELERATION_COEF;
+		rot_y += y_acc * ACCELERATION_COEF;
+		rot_z += z_acc * ACCELERATION_COEF;
+
+		return true;
+	}
+
+	return false;
+}
+
+void PSVR::Recenter()
+{
+	rot_x = 0.0f;
+	rot_y = 0.0f;
+	rot_z = 0.0f;
 }
 
 int16_t read_int16(unsigned char *buffer, int offset)

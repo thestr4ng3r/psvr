@@ -6,14 +6,21 @@
 #define PSVR_PSVR_TASK_H
 
 #include <QThread>
+#include "psvr.h"
 
 class PSVRThread : public QThread
 {
 	Q_OBJECT
 
+	private:
+		PSVR *psvr;
+		bool running;
+
 	public:
-		PSVRThread(QObject *parent = 0);
+		PSVRThread(PSVR *psvr, QObject *parent = 0);
 		~PSVRThread();
+
+		void Stop(void)	{ running = false; }
 
 	signals:
 		void PSVRAcceleration(short x, short y, short z);

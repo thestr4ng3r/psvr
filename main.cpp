@@ -1,22 +1,40 @@
 
 #include <QApplication>
 
+#include "videoplayer.h"
+#include "psvr.h"
 #include "mainwindow.h"
 #include "hmdwindow.h"
 
 int main(int argc, char *argv[])
 {
 	QSurfaceFormat format;
+	format.setMajorVersion(3);
+	format.setMinorVersion(3);
+	format.setProfile(QSurfaceFormat::CoreProfile);
 	QSurfaceFormat::setDefaultFormat(format);
 
 	QApplication app(argc, argv);
 
-	MainWindow main_window;
+	PSVR psvr;
+	PSVRThread *psvr_thread = new PSVRThread(&psvr);
+
+	VideoPlayer video_player;
+
+	MainWindow main_window(&video_player, &psvr, psvr_thread);
 	main_window.show();
 
-	HMDWindow hmd_window;
+	HMDWindow hmd_window(&video_player, &psvr);
 	hmd_window.show();
 
-	return app.exec();
+	video_player.PlayVideo("test.webm");
+
+	psvr_thread->start();
+
+	int r = app.exec();
+
+	delete psvr_thread;
+
+	return r;
 }
 

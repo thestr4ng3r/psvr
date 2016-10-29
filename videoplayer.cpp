@@ -1,6 +1,4 @@
-//
-// Created by florian on 28.10.16.
-//
+
 
 #include <vlc/vlc.h>
 
@@ -25,24 +23,28 @@ static void display(void *data, void *id)
 
 
 
-VideoPlayer::VideoPlayer(unsigned int width, unsigned int height)
+VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent)
 {
-	this->width = width;
-	this->height = height;
+	this->width = 512;
+	this->height = 512;
 
 	const char *vlc_argv[] =
 		{
-			"--no-audio",
+			/*"--no-audio",*/
 			"--no-xlib"
 		};
 
-	libvlc = libvlc_new(2, vlc_argv);
+	libvlc = libvlc_new(1, vlc_argv);
 
 	video_data = new unsigned char[width * height * 3];
 }
 
 VideoPlayer::~VideoPlayer()
 {
+	libvlc_media_player_stop(media_player);
+	libvlc_media_player_release(media_player);
+	libvlc_release(libvlc);
+	data_mutex.unlock();
 	delete[] video_data;
 }
 
@@ -72,5 +74,6 @@ void VideoPlayer::VLC_Unlock(void *id, void *const *p_pixels)
 
 void VideoPlayer::VLC_Display(void *id)
 {
+	emit DisplayVideoFrame();
 	//printf("display\n");
 }

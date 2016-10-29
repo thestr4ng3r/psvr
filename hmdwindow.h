@@ -5,6 +5,7 @@
 #include <QMainWindow>
 
 #include "hmdwidget.h"
+#include "mainwindow.h"
 
 class HMDWindow : public QMainWindow
 {
@@ -13,9 +14,15 @@ class HMDWindow : public QMainWindow
 	private:
 		HMDWidget *hmd_widget;
 
+		VideoPlayer *video_player;
+		PSVR *psvr;
+
 	public:
-		HMDWindow(QWidget *parent = 0);
+		HMDWindow(VideoPlayer *video_player, PSVR *psvr, QWidget *parent = 0);
 		~HMDWindow();
+
+	protected:
+		void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
 
 };
 

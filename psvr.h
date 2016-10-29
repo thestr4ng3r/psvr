@@ -1,6 +1,3 @@
-//
-// Created by florian on 27.10.16.
-//
 
 #ifndef PSVR_PSVR_H
 #define PSVR_PSVR_H
@@ -26,7 +23,9 @@ class PSVR
 		void Open();
 		void Close();
 
-		void Read();
+		bool Read();
+
+		void Recenter();
 
 		short GetAccelerationX(void)	{ return x_acc; }
 		short GetAccelerationY(void)	{ return y_acc; }
@@ -37,7 +36,5 @@ class PSVR
 		float GetRotationZ(void)		{ return rot_z; }
 
 };
-
-extern PSVR psvr;
 
 #endif //PSVR_PSVR_H
