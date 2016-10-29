@@ -21,7 +21,7 @@ void PSVRThread::run()
 	while(running)
 	{
 		while(psvr->Read())
-			emit PSVRAcceleration(psvr->GetAccelerationX(), psvr->GetAccelerationY(), psvr->GetAccelerationZ());
+			emit PSVRUpdate();
 
 		msleep(1);
 	}

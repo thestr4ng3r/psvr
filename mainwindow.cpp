@@ -15,7 +15,7 @@ MainWindow::MainWindow(VideoPlayer *video_player, PSVR *psvr, PSVRThread *psvr_t
 
 	ui->DebugLabel->setText("test");
 
-	connect(psvr_thread, SIGNAL(PSVRAcceleration(short, short, short)), this, SLOT(PSVRAcceleration(short, short, short)));
+	connect(psvr_thread, SIGNAL(PSVRUpdate()), this, SLOT(PSVRUpdate()));
 }
 
 MainWindow::~MainWindow()
@@ -25,7 +25,7 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-void MainWindow::PSVRAcceleration(short x, short y, short z)
+void MainWindow::PSVRUpdate()
 {
-	ui->DebugLabel->setText(QString::asprintf("%f %f %f", psvr->GetRotationX(), psvr->GetRotationY(), psvr->GetRotationZ()));
+	ui->DebugLabel->setText(QString::asprintf("%d\t%d\t%d", psvr->GetAccelerationX(), psvr->GetAccelerationY(), psvr->GetAccelerationZ()));
 }

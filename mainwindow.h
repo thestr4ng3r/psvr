@@ -31,7 +31,7 @@ class MainWindow : public QMainWindow
 		~MainWindow();
 
 	protected slots:
-		void PSVRAcceleration(short x, short y, short z);
+		void PSVRUpdate();
 };
 
 

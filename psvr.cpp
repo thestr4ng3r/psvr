@@ -24,7 +24,7 @@ PSVR::PSVR()
 	psvr_device = 0;
 	memset(buffer, 0, sizeof(buffer));
 
-	rot_x = rot_y = rot_z = 0.0f;
+	modelview_matrix.setToIdentity();
 }
 
 PSVR::~PSVR()
@@ -81,9 +81,9 @@ bool PSVR::Read()
 		y_acc = read_int16(buffer, 22) + read_int16(buffer, 38);
 		z_acc = read_int16(buffer, 24) + read_int16(buffer, 40);
 
-		rot_x += x_acc * ACCELERATION_COEF;
-		rot_y += y_acc * ACCELERATION_COEF;
-		rot_z += z_acc * ACCELERATION_COEF;
+		modelview_matrix.rotate(-y_acc * ACCELERATION_COEF, QVector3D(1.0, 0.0, 0.0) * modelview_matrix);
+		modelview_matrix.rotate(-x_acc * ACCELERATION_COEF, QVector3D(0.0, 1.0, 0.0) * modelview_matrix);
+		modelview_matrix.rotate(z_acc * ACCELERATION_COEF, QVector3D(0.0, 0.0, 1.0) * modelview_matrix);
 
 		return true;
 	}
@@ -93,9 +93,7 @@ bool PSVR::Read()
 
 void PSVR::Recenter()
 {
-	rot_x = 0.0f;
-	rot_y = 0.0f;
-	rot_z = 0.0f;
+	modelview_matrix.setToIdentity();
 }
 
 int16_t read_int16(unsigned char *buffer, int offset)

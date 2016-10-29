@@ -17,8 +17,8 @@ void main(void)
 	dir_h /= length_h;
 	vec2 dir_v = normalize(vec2(length_h, position_var.y));
 
-	vec2 sphere_coord = vec2(asin(dir_h.y), acos(dir_v.y)) * (2.0 / M_PI, 1.0 / M_PI);
-	if(dir_h.x < 0.0)
+	vec2 sphere_coord = vec2(acos(dir_h.y), acos(dir_v.y)) * vec2(0.5 / M_PI, 1.0 / M_PI);
+	if(dir_h.x > 0.0)
 		sphere_coord.x = 1.0 - sphere_coord.x;
 
 	vec2 uv = min_max_uv_uni.xy + (min_max_uv_uni.zw - min_max_uv_uni.xy) * sphere_coord;

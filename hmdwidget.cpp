@@ -182,9 +182,10 @@ void HMDWidget::RenderEye(int eye, int width, int height)
 	sphere_shader->bind();
 
 	QMatrix4x4 modelview_matrix;
-	modelview_matrix.rotate(psvr->GetRotationZ(), 0.0f, 0.0f, 1.0f);
-	modelview_matrix.rotate(-psvr->GetRotationY(), 1.0f, 0.0f, 0.0f);
-	modelview_matrix.rotate(-psvr->GetRotationX(), 0.0f, 1.0f, 0.0f);
+	//modelview_matrix.rotate(psvr->GetRotationZ(), 0.0f, 0.0f, 1.0f);
+	//modelview_matrix.rotate(-psvr->GetRotationY(), 1.0f, 0.0f, 0.0f);
+	//modelview_matrix.rotate(-psvr->GetRotationX(), 0.0f, 1.0f, 0.0f);
+	modelview_matrix = psvr->GetModelViewMatrix();
 
 	QMatrix4x4 projection_matrix;
 	projection_matrix.perspective(80.0f, (float)width / (float)height, 0.1f, 100.0f);

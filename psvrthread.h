@@ -23,7 +23,7 @@ class PSVRThread : public QThread
 		void Stop(void)	{ running = false; }
 
 	signals:
-		void PSVRAcceleration(short x, short y, short z);
+		void PSVRUpdate();
 
 	protected:
 		void run() Q_DECL_OVERRIDE;

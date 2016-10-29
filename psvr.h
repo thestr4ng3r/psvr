@@ -3,6 +3,7 @@
 #define PSVR_PSVR_H
 
 #include <hidapi/hidapi.h>
+#include <QMatrix4x4>
 
 #define PSVR_BUFFER_SIZE 64
 
@@ -14,7 +15,7 @@ class PSVR
 		unsigned char buffer[PSVR_BUFFER_SIZE];
 		short x_acc, y_acc, z_acc;
 
-		float rot_x, rot_y, rot_z;
+		QMatrix4x4 modelview_matrix;
 
 	public:
 		PSVR();
@@ -31,9 +32,7 @@ class PSVR
 		short GetAccelerationY(void)	{ return y_acc; }
 		short GetAccelerationZ(void)	{ return z_acc; }
 
-		float GetRotationX(void)		{ return rot_x; }
-		float GetRotationY(void)		{ return rot_y; }
-		float GetRotationZ(void)		{ return rot_z; }
+		QMatrix4x4 GetModelViewMatrix(void)	{ return modelview_matrix; }
 
 };
 
