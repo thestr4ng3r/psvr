@@ -23,7 +23,7 @@ class HMDWidget : public QOpenGLWidget
 
 		QOpenGLFunctions *gl;
 
-		QOpenGLShaderProgram *test_shader;
+		QOpenGLShaderProgram *sphere_shader;
 		GLint modelview_projection_uni;
 
 		QOpenGLBuffer vbo;
@@ -32,6 +32,7 @@ class HMDWidget : public QOpenGLWidget
 		QOpenGLTexture *video_tex;
 
 
+		void UpdateTexture();
 		void RenderEye(int eye, int width, int height);
 
 	public:

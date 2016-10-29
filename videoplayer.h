@@ -30,12 +30,18 @@ class VideoPlayer : public QObject
 		void PlayVideo(const char *path);
 
 		unsigned char *GetVideoData()		{ return video_data; }
+		unsigned int GetWidth()				{ return width; }
+		unsigned int GetHeight()			{ return height; }
+
 		void LockVideoData()				{ data_mutex.lock(); }
 		void UnlockVideoData()				{ data_mutex.unlock(); }
 
 		void *VLC_Lock(void **p_pixels);
 		void VLC_Unlock(void *id, void *const *p_pixels);
 		void VLC_Display(void *id);
+
+		unsigned int VLC_Setup(char *chroma, unsigned int *width, unsigned int *height, unsigned int *pitches, unsigned int *lines);
+		void VLC_Cleanup();
 
 	signals:
 		void DisplayVideoFrame();
