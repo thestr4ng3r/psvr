@@ -45,11 +45,11 @@ VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent)
 
 	const char *vlc_argv[] =
 		{
-			/*"--no-audio",*/
+			"--no-audio",
 			"--no-xlib"
 		};
 
-	libvlc = libvlc_new(1, vlc_argv);
+	libvlc = libvlc_new(2, vlc_argv);
 }
 
 VideoPlayer::~VideoPlayer()

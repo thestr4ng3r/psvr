@@ -21,6 +21,8 @@ class HMDWindow : public QMainWindow
 		HMDWindow(VideoPlayer *video_player, PSVR *psvr, QWidget *parent = 0);
 		~HMDWindow();
 
+		HMDWidget *GetHMDWidget()	{ return hmd_widget; }
+
 	protected:
 		void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
 

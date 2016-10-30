@@ -13,6 +13,7 @@ namespace Ui
 	class MainWindow;
 }
 
+class HMDWindow;
 
 class MainWindow : public QMainWindow
 {
@@ -26,12 +27,20 @@ class MainWindow : public QMainWindow
 		VideoPlayer *video_player;
 		PSVR *psvr;
 
+		HMDWindow *hmd_window;
+
 	public:
 		MainWindow(VideoPlayer *video_player, PSVR *psvr, PSVRThread *psvr_thread, QWidget *parent = 0);
 		~MainWindow();
 
+		void SetHMDWindow(HMDWindow *hmd_window);
+
 	protected slots:
 		void PSVRUpdate();
+		void FOVValueChanged(double v);
+
+	protected:
+		void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
 };
 
 

@@ -1,5 +1,6 @@
 
 #include <QApplication>
+#include <QWindow>
 
 #include "videoplayer.h"
 #include "psvr.h"
@@ -26,6 +27,11 @@ int main(int argc, char *argv[])
 
 	HMDWindow hmd_window(&video_player, &psvr);
 	hmd_window.show();
+	hmd_window.showFullScreen();
+	//hmd_window.windowHandle()->setScreen(app.screens()[1]);
+	hmd_window.setGeometry(1920, 0, 1920, 1080);
+
+	main_window.SetHMDWindow(&hmd_window);
 
 	video_player.PlayVideo("test.webm");
 

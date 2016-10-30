@@ -16,7 +16,20 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QListView" name="ListView"/>
+     <widget class="QTableWidget" name="TestTableWidget"/>
+    </item>
+    <item>
+     <widget class="QDoubleSpinBox" name="FOVDoubleSpinBox">
+      <property name="minimum">
+       <double>30.000000000000000</double>
+      </property>
+      <property name="maximum">
+       <double>180.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.500000000000000</double>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QLabel" name="DebugLabel">

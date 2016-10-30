@@ -31,6 +31,7 @@ class HMDWidget : public QOpenGLWidget
 
 		QOpenGLTexture *video_tex;
 
+		float fov;
 
 		void UpdateTexture();
 		void RenderEye(int eye, int width, int height);
@@ -38,6 +39,9 @@ class HMDWidget : public QOpenGLWidget
 	public:
 		HMDWidget(VideoPlayer *video_player, PSVR *psvr, QWidget *parent = 0);
 		~HMDWidget();
+
+		float GetFOV()			{ return fov; }
+		void SetFOV(float fov)	{ this->fov = fov; }
 
 	protected:
 		void initializeGL() Q_DECL_OVERRIDE;

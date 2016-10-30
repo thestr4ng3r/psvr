@@ -9,6 +9,8 @@ HMDWidget::HMDWidget(VideoPlayer *video_player, PSVR *psvr, QWidget *parent) : Q
 	gl = 0;
 
 	sphere_shader = 0;
+
+	fov = 90.0f;
 }
 
 HMDWidget::~HMDWidget()
@@ -177,7 +179,7 @@ void HMDWidget::UpdateTexture()
 void HMDWidget::RenderEye(int eye, int width, int height)
 {
 	gl->glEnable(GL_CULL_FACE);
-	gl->glEnable(GL_DEPTH_TEST);
+	gl->glDisable(GL_DEPTH_TEST);
 
 	sphere_shader->bind();
 
@@ -188,7 +190,7 @@ void HMDWidget::RenderEye(int eye, int width, int height)
 	modelview_matrix = psvr->GetModelViewMatrix();
 
 	QMatrix4x4 projection_matrix;
-	projection_matrix.perspective(80.0f, (float)width / (float)height, 0.1f, 100.0f);
+	projection_matrix.perspective(fov, (float)width / (float)height, 0.1f, 100.0f);
 	sphere_shader->setUniformValue("modelview_projection_uni", projection_matrix * modelview_matrix);
 
 	sphere_shader->setUniformValue("tex_uni", 0);

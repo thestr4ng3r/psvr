@@ -23,6 +23,7 @@ void main(void)
 
 	vec2 uv = min_max_uv_uni.xy + (min_max_uv_uni.zw - min_max_uv_uni.xy) * sphere_coord;
 
+	//vec3 color = vec3(mod(position_var.x, 0.2), mod(position_var.y, 0.2), mod(position_var.z, 0.2));
 	vec3 color = texture(tex_uni, uv).rgb;
 	color_out = vec4(color, 1.0);
 }
