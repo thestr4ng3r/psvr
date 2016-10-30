@@ -18,16 +18,26 @@ class VideoPlayer : public QObject
 		libvlc_instance_t *libvlc;
 		libvlc_media_t *media;
 		libvlc_media_player_t *media_player;
+		libvlc_event_manager_t *event_manager;
 
 		unsigned int width, height;
 		unsigned char *video_data;
 		QMutex data_mutex;
 
+		void UnloadVideo();
+
 	public:
 		VideoPlayer(QObject *parent = 0);
 		~VideoPlayer();
 
-		void PlayVideo(const char *path);
+		bool LoadVideo(const char *path);
+
+		void Play();
+		void Pause();
+		void Stop();
+		void SetPosition(float pos);
+
+		bool IsPlaying();
 
 		unsigned char *GetVideoData()		{ return video_data; }
 		unsigned int GetWidth()				{ return width; }
@@ -43,8 +53,15 @@ class VideoPlayer : public QObject
 		unsigned int VLC_Setup(char *chroma, unsigned int *width, unsigned int *height, unsigned int *pitches, unsigned int *lines);
 		void VLC_Cleanup();
 
+		void VLC_Event(const struct libvlc_event_t *event);
+
 	signals:
 		void DisplayVideoFrame();
+
+		void Playing();
+		void Paused();
+		void Stopped();
+		void PositionChanged(float pos);
 };
 
 #endif //PSVR_VIDEOPLAYER_H

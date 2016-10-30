@@ -10,7 +10,11 @@ HMDWindow::HMDWindow(VideoPlayer *video_player, PSVR *psvr, QWidget *parent) : Q
 	this->video_player = video_player;
 	this->psvr = psvr;
 
-	resize(800, 600);
+	main_window = 0;
+
+	setWindowTitle(tr("PSVR HMD"));
+
+	resize(640, 480);
 
 	hmd_widget = new HMDWidget(video_player, psvr);
 	setCentralWidget(hmd_widget);
@@ -23,12 +27,31 @@ HMDWindow::~HMDWindow()
 
 void HMDWindow::keyPressEvent(QKeyEvent *event)
 {
-	if(event->key() == Qt::Key_R)
+	switch(event->key())
 	{
-		psvr->Recenter();
+		case Qt::Key_R:
+			psvr->ResetView();
+			break;
+		case Qt::Key_F11:
+			if(this->isFullScreen())
+				showNormal();
+			else
+				showFullScreen();
+			break;
+		default:
+			QMainWindow::keyPressEvent(event);
+			break;
+
 	}
-	else
+}
+
+void HMDWindow::closeEvent(QCloseEvent *event)
+{
+	if(main_window)
 	{
-		QMainWindow::keyPressEvent(event);
+		main_window->SetHMDWindow(0);
+		main_window->close();
 	}
+
+	QMainWindow::closeEvent(event);
 }

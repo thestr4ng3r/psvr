@@ -20,10 +20,8 @@ void PSVRThread::run()
 
 	while(running)
 	{
-		while(psvr->Read())
+		if(psvr->Read(1))
 			emit PSVRUpdate();
-
-		msleep(1);
 	}
 
 	psvr->Close();

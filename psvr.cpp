@@ -55,7 +55,7 @@ void PSVR::Open()
 	if(r > 0)
 		printf("SN: %ls\n", wstr);
 
-	hid_set_nonblocking(psvr_device, 1);
+	//hid_set_nonblocking(psvr_device, 1);
 }
 
 
@@ -68,12 +68,12 @@ void PSVR::Close()
 	psvr_device = 0;
 }
 
-bool PSVR::Read()
+bool PSVR::Read(int timeout)
 {
 	if(!psvr_device)
 		return false;
 
-	int size = hid_read(psvr_device, buffer, PSVR_BUFFER_SIZE);
+	int size = hid_read_timeout(psvr_device, buffer, PSVR_BUFFER_SIZE, timeout);
 
 	if(size == 64)
 	{
@@ -91,7 +91,7 @@ bool PSVR::Read()
 	return false;
 }
 
-void PSVR::Recenter()
+void PSVR::ResetView()
 {
 	modelview_matrix.setToIdentity();
 }

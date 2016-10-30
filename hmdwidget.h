@@ -8,6 +8,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLTexture>
 #include <QOpenGLFunctions>
+#include <QOpenGLFramebufferObject>
 
 #include "videoplayer.h"
 #include "psvr.h"
@@ -24,24 +25,31 @@ class HMDWidget : public QOpenGLWidget
 		QOpenGLFunctions *gl;
 
 		QOpenGLShaderProgram *sphere_shader;
-		GLint modelview_projection_uni;
+		QOpenGLShaderProgram *distortion_shader;
 
-		QOpenGLBuffer vbo;
-		QOpenGLVertexArrayObject vao;
+		QOpenGLBuffer cube_vbo;
+		QOpenGLVertexArrayObject cube_vao;
 
 		QOpenGLTexture *video_tex;
 
-		float fov;
 
+		/*QOpenGLBuffer screen_vbo;
+		QOpenGLVertexArrayObject screen_vao;
+		QOpenGLFramebufferObject *fbo;*/
+
+		float fov;
+		float barrel_power;
+
+		//void CreateFBO(int width, int height);
 		void UpdateTexture();
-		void RenderEye(int eye, int width, int height);
+		void RenderEye(int eye);
 
 	public:
 		HMDWidget(VideoPlayer *video_player, PSVR *psvr, QWidget *parent = 0);
 		~HMDWidget();
 
-		float GetFOV()			{ return fov; }
-		void SetFOV(float fov)	{ this->fov = fov; }
+		float GetFOV()						{ return fov; }
+		void SetFOV(float fov)				{ this->fov = fov; }
 
 	protected:
 		void initializeGL() Q_DECL_OVERRIDE;

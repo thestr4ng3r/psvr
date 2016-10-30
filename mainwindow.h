@@ -3,6 +3,7 @@
 #define PSVR_MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTimer>
 
 #include "psvrthread.h"
 #include "videoplayer.h"
@@ -29,6 +30,9 @@ class MainWindow : public QMainWindow
 
 		HMDWindow *hmd_window;
 
+		float player_position_delayed;
+		QTimer player_position_delay_timer;
+
 	public:
 		MainWindow(VideoPlayer *video_player, PSVR *psvr, PSVRThread *psvr_thread, QWidget *parent = 0);
 		~MainWindow();
@@ -39,7 +43,24 @@ class MainWindow : public QMainWindow
 		void PSVRUpdate();
 		void FOVValueChanged(double v);
 
+		void ResetView();
+
+		void OpenVideoFile();
+
+		void UIPlayerPlay();
+		void UIPlayerStop();
+		void UIPlayerPositionChanged(int value);
+
+		void UIPlayerPositionChangedDelayed();
+
+		void PlayerPlaying();
+		void PlayerPaused();
+		void PlayerStopped();
+		void PlayerPositionChanged(float pos);
+
+
 	protected:
+		void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
 		void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
 };
 

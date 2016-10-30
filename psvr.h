@@ -24,9 +24,9 @@ class PSVR
 		void Open();
 		void Close();
 
-		bool Read();
+		bool Read(int timeout);
 
-		void Recenter();
+		void ResetView();
 
 		short GetAccelerationX(void)	{ return x_acc; }
 		short GetAccelerationY(void)	{ return y_acc; }

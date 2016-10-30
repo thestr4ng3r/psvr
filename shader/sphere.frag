@@ -5,7 +5,6 @@
 uniform sampler2D tex_uni;
 uniform vec4 min_max_uv_uni;
 
-in vec3 uv_var;
 in vec3 position_var;
 
 out vec4 color_out;

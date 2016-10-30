@@ -17,14 +17,19 @@ class HMDWindow : public QMainWindow
 		VideoPlayer *video_player;
 		PSVR *psvr;
 
+		MainWindow *main_window;
+
 	public:
 		HMDWindow(VideoPlayer *video_player, PSVR *psvr, QWidget *parent = 0);
 		~HMDWindow();
 
-		HMDWidget *GetHMDWidget()	{ return hmd_widget; }
+		HMDWidget *GetHMDWidget()					{ return hmd_widget; }
+
+		void SetMainWindow(MainWindow *main_window)	{ this->main_window = main_window; }
 
 	protected:
 		void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
+		void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
 
 };
 

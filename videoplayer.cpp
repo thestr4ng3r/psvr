@@ -22,14 +22,20 @@ static void display(void *data, void *id)
 }
 
 
-unsigned int setup(void **opaque, char *chroma, unsigned int *width, unsigned int *height, unsigned int *pitches, unsigned int *lines)
+static unsigned int setup(void **opaque, char *chroma, unsigned int *width, unsigned int *height, unsigned int *pitches, unsigned int *lines)
 {
 	return ((VideoPlayer *) *opaque)->VLC_Setup(chroma, width, height, pitches, lines);
 }
 
-void cleanup(void *opaque)
+static void cleanup(void *opaque)
 {
 	((VideoPlayer *) opaque)->VLC_Cleanup();
+}
+
+
+static void vlc_event(const struct libvlc_event_t *event, void *data)
+{
+	((VideoPlayer *)data)->VLC_Event(event);
 }
 
 
@@ -43,6 +49,10 @@ VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent)
 
 	video_data = 0;
 
+	media = 0;
+	media_player = 0;
+	event_manager = 0;
+
 	const char *vlc_argv[] =
 		{
 			"--no-audio",
@@ -54,22 +64,92 @@ VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent)
 
 VideoPlayer::~VideoPlayer()
 {
-	libvlc_media_player_stop(media_player);
-	libvlc_media_player_release(media_player);
+	UnloadVideo();
 	libvlc_release(libvlc);
-	data_mutex.unlock();
 	delete[] video_data;
 }
 
-void VideoPlayer::PlayVideo(const char *path)
+bool VideoPlayer::LoadVideo(const char *path)
 {
+	UnloadVideo();
+
 	media = libvlc_media_new_path(libvlc, path);
+	if(!media)
+		return false;
+
 	media_player = libvlc_media_player_new_from_media(media);
+	if(!media_player)
+	{
+		libvlc_media_release(media);
+		media = 0;
+		return false;
+	}
 
 	libvlc_video_set_callbacks(media_player, lock, unlock, display, this);
 	libvlc_video_set_format_callbacks(media_player, setup, cleanup);
 	//libvlc_video_set_format(media_player, "RV24", width, height, width*3);
+
+	event_manager = libvlc_media_player_event_manager(media_player);
+	libvlc_event_attach(event_manager, libvlc_MediaPlayerPositionChanged, vlc_event, this);
+	libvlc_event_attach(event_manager, libvlc_MediaPlayerStopped, vlc_event, this);
+	libvlc_event_attach(event_manager, libvlc_MediaPlayerPlaying, vlc_event, this);
+	libvlc_event_attach(event_manager, libvlc_MediaPlayerPaused, vlc_event, this);
+
 	libvlc_media_player_play(media_player);
+
+	return true;
+}
+
+void VideoPlayer::UnloadVideo()
+{
+	if(media_player)
+	{
+		libvlc_media_player_stop(media_player);
+		libvlc_media_player_release(media_player);
+	}
+	if(media)
+		libvlc_media_release(media);
+
+	data_mutex.unlock();
+
+	media = 0;
+	media_player = 0;
+	event_manager = 0;
+}
+
+void VideoPlayer::Play()
+{
+	if(!media_player)
+		return;
+	libvlc_media_player_play(media_player);
+}
+
+void VideoPlayer::Pause()
+{
+	if(!media_player)
+		return;
+	libvlc_media_player_pause(media_player);
+}
+
+void VideoPlayer::Stop()
+{
+	if(!media_player)
+		return;
+	libvlc_media_player_stop(media_player);
+}
+
+void VideoPlayer::SetPosition(float pos)
+{
+	if(!media_player)
+		return;
+	libvlc_media_player_set_position(media_player, pos);
+}
+
+bool VideoPlayer::IsPlaying()
+{
+	if(!media_player)
+		return false;
+	return libvlc_media_player_is_playing(media_player) != 0;
 }
 
 void *VideoPlayer::VLC_Lock(void **p_pixels)
@@ -111,4 +191,25 @@ void VideoPlayer::VLC_Cleanup()
 {
 	delete[] video_data;
 	video_data = 0;
+}
+
+void VideoPlayer::VLC_Event(const struct libvlc_event_t *event)
+{
+	switch(event->type)
+	{
+		case libvlc_MediaPlayerPositionChanged:
+			emit PositionChanged(event->u.media_player_position_changed.new_position);
+			break;
+		case libvlc_MediaPlayerPlaying:
+			emit Playing();
+			break;
+		case libvlc_MediaPlayerPaused:
+			emit Paused();
+			break;
+		case libvlc_MediaPlayerStopped:
+			emit Stopped();
+			break;
+		default:
+			break;
+	}
 }

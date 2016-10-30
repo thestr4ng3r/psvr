@@ -7,83 +7,83 @@ HMDWidget::HMDWidget(VideoPlayer *video_player, PSVR *psvr, QWidget *parent) : Q
 	this->psvr = psvr;
 
 	gl = 0;
+	//fbo = 0;
 
 	sphere_shader = 0;
+	distortion_shader = 0;
+	video_tex = 0;
 
-	fov = 90.0f;
+	fov = 80.0f;
 }
 
 HMDWidget::~HMDWidget()
 {
-	delete sphere_shader;
+	delete video_tex;
+	//delete fbo;
 }
 
 
 static const QVector3D cube_vertices[] = {
 		// back
-		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D( -1.0f, -1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+		QVector3D(-1.0f,  1.0f, -1.0f),
+		QVector3D(-1.0f, -1.0f, -1.0f),
+		QVector3D( 1.0f, -1.0f, -1.0f),
 
-		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D(  1.0f,  1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+		QVector3D( 1.0f, -1.0f, -1.0f),
+		QVector3D( 1.0f,  1.0f, -1.0f),
+		QVector3D(-1.0f,  1.0f, -1.0f),
 
 		// front
-		QVector3D(  1.0f,  1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D(  1.0f, -1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D( -1.0f, -1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+		QVector3D( 1.0f,  1.0f,  1.0f),
+		QVector3D( 1.0f, -1.0f,  1.0f),
+		QVector3D(-1.0f, -1.0f,  1.0f),
 
-		QVector3D( -1.0f, -1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D( -1.0f,  1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D(  1.0f,  1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+		QVector3D(-1.0f, -1.0f,  1.0f),
+		QVector3D(-1.0f,  1.0f,  1.0f),
+		QVector3D( 1.0f,  1.0f,  1.0f),
 
 		// left
-		QVector3D( -1.0f,  1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D( -1.0f, -1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D( -1.0f, -1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+		QVector3D(-1.0f,  1.0f,  1.0f),
+		QVector3D(-1.0f, -1.0f,  1.0f),
+		QVector3D(-1.0f, -1.0f, -1.0f),
 
-		QVector3D( -1.0f, -1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D( -1.0f,  1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+		QVector3D(-1.0f, -1.0f, -1.0f),
+		QVector3D(-1.0f,  1.0f, -1.0f),
+		QVector3D(-1.0f,  1.0f,  1.0f),
 
 		// right
-		QVector3D(  1.0f,  1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D(  1.0f, -1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+		QVector3D( 1.0f,  1.0f, -1.0f),
+		QVector3D( 1.0f, -1.0f, -1.0f),
+		QVector3D( 1.0f, -1.0f,  1.0f),
 
-		QVector3D(  1.0f, -1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D(  1.0f,  1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D(  1.0f,  1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+		QVector3D( 1.0f, -1.0f,  1.0f),
+		QVector3D( 1.0f,  1.0f,  1.0f),
+		QVector3D( 1.0f,  1.0f, -1.0f),
 
 		// top
-		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D(  1.0f,  1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D(  1.0f,  1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+		QVector3D(-1.0f,  1.0f, -1.0f),
+		QVector3D( 1.0f,  1.0f, -1.0f),
+		QVector3D( 1.0f,  1.0f,  1.0f),
 
-		QVector3D(  1.0f,  1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D( -1.0f,  1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+		QVector3D( 1.0f,  1.0f,  1.0f),
+		QVector3D(-1.0f,  1.0f,  1.0f),
+		QVector3D(-1.0f,  1.0f, -1.0f),
 
 		// bottom
-		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D( -1.0f, -1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D( -1.0f, -1.0f,  1.0f), QVector3D(0.0f, 0.0f, 1.0f),
+		QVector3D( 1.0f, -1.0f, -1.0f),
+		QVector3D(-1.0f, -1.0f, -1.0f),
+		QVector3D(-1.0f, -1.0f,  1.0f),
 
-		QVector3D( -1.0f, -1.0f,  1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D(  1.0f, -1.0f,  1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(0.0f, 0.0f, 1.0f)
+		QVector3D(-1.0f, -1.0f,  1.0f),
+		QVector3D( 1.0f, -1.0f,  1.0f),
+		QVector3D( 1.0f, -1.0f, -1.0f)
 	};
 
-
-static const QVector3D plane_vertices[] = {
-		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(0.0f, 0.0f, 0.0f),
-		QVector3D( -1.0f, -1.0f, -1.0f), QVector3D(0.0f, 1.0f, 0.0f),
-		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(1.0f, 1.0f, 0.0f),
-
-		QVector3D(  1.0f, -1.0f, -1.0f), QVector3D(1.0f, 1.0f, 0.0f),
-		QVector3D(  1.0f,  1.0f, -1.0f), QVector3D(1.0f, 0.0f, 0.0f),
-		QVector3D( -1.0f,  1.0f, -1.0f), QVector3D(0.0f, 0.0f, 0.0f)
+static const QVector2D screen_vertices[] = {
+		QVector2D(-1.0f,  1.0f),
+		QVector2D(-1.0f, -1.0f),
+		QVector2D( 1.0f,  1.0f),
+		QVector2D( 1.0f, -1.0f)
 	};
 
 void HMDWidget::initializeGL()
@@ -91,30 +91,27 @@ void HMDWidget::initializeGL()
 	gl = context()->functions();
 
 	sphere_shader = new QOpenGLShaderProgram(this);
-	sphere_shader->addShaderFromSourceFile(QOpenGLShader::Vertex, "./shader/sphere.vert");
-	sphere_shader->addShaderFromSourceFile(QOpenGLShader::Fragment, "./shader/sphere.frag");
+	sphere_shader->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/sphere.vert");
+	sphere_shader->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/sphere.frag");
 	sphere_shader->link();
 
 	sphere_shader->bind();
 	sphere_shader->bindAttributeLocation("vertex_attr", 0);
-	sphere_shader->bindAttributeLocation("uv_attr", 1);
-	//modelview_projection_uni = sphere_shader->uniformLocation("modelview_projection_uni");
 
-	vbo.create();
-	vbo.bind();
-	vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-	vbo.allocate(cube_vertices, sizeof(cube_vertices));
+	cube_vbo.create();
+	cube_vbo.bind();
+	cube_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+	cube_vbo.allocate(cube_vertices, sizeof(cube_vertices));
 
-	vao.create();
-	vao.bind();
+	cube_vao.create();
+	cube_vao.bind();
 	sphere_shader->enableAttributeArray(0);
 	sphere_shader->enableAttributeArray(1);
-	sphere_shader->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(QVector3D) * 2);
-	sphere_shader->setAttributeBuffer(1, GL_FLOAT, sizeof(QVector3D), 3, sizeof(QVector3D) * 2);
+	sphere_shader->setAttributeBuffer(0, GL_FLOAT, 0, 3);
 
 	sphere_shader->release();
-	vbo.release();
-	vao.release();
+	cube_vbo.release();
+	cube_vao.release();
 
 	video_tex = new QOpenGLTexture(QOpenGLTexture::Target2D);
 	video_tex->create();
@@ -125,11 +122,33 @@ void HMDWidget::initializeGL()
 	video_tex->bind();
 	unsigned char data[3] = { 0, 0, 0};
 	video_tex->setData(QOpenGLTexture::PixelFormat::RGB, QOpenGLTexture::PixelType::UInt8, (const void *)data);
+
+
+	/*distortion_shader = new QOpenGLShaderProgram(this);
+	distortion_shader->addShaderFromSourceFile(QOpenGLShader::Vertex, "./shader/distortion.vert");
+	distortion_shader->addShaderFromSourceFile(QOpenGLShader::Fragment, "./shader/distortion.frag");
+	distortion_shader->link();
+
+	distortion_shader->bind();
+	distortion_shader->bindAttributeLocation("vertex_attr", 0);
+
+	screen_vbo.create();
+	screen_vbo.bind();
+	screen_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+	screen_vbo.allocate(screen_vertices, sizeof(screen_vertices));
+
+	screen_vao.create();
+	screen_vao.bind();
+	distortion_shader->enableAttributeArray(0);
+	distortion_shader->setAttributeBuffer(0, GL_FLOAT, 0, 2);
+
+	CreateFBO(width() / 2, height());*/
 }
 
 
 void HMDWidget::resizeGL(int w, int h)
 {
+	//CreateFBO(w / 2, h);
 	update();
 }
 
@@ -140,19 +159,25 @@ void HMDWidget::paintGL()
 
 	UpdateTexture();
 
-	gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	gl->glClear(GL_COLOR_BUFFER_BIT);
+	gl->glEnable(GL_CULL_FACE);
+	gl->glDisable(GL_DEPTH_TEST);
 
 	/*gl->glViewport(0, 0, w, h);
 	RenderEye(0, w, h);*/
 
-	gl->glViewport(0, 0, w/2, h);
-	RenderEye(0, w/2, h);
-
-	gl->glViewport(w/2, 0, w/2, h);
-	RenderEye(1, w/2, h);
+	RenderEye(0);
+	RenderEye(1);
 
 	update();
 }
+
+
+/*void HMDWidget::CreateFBO(int width, int height)
+{
+	delete fbo;
+	fbo = new QOpenGLFramebufferObject(width, height);
+}*/
 
 void HMDWidget::UpdateTexture()
 {
@@ -176,21 +201,26 @@ void HMDWidget::UpdateTexture()
 	video_tex->setData(QOpenGLTexture::PixelFormat::RGB, QOpenGLTexture::PixelType::UInt8, video_player->GetVideoData());
 }
 
-void HMDWidget::RenderEye(int eye, int width, int height)
+void HMDWidget::RenderEye(int eye)
 {
-	gl->glEnable(GL_CULL_FACE);
-	gl->glDisable(GL_DEPTH_TEST);
+	int w = width();
+	int h = height();
+
+	//fbo->bind();
+	//gl->glViewport(0, 0, w/2, h);
+	//gl->glClear(GL_COLOR_BUFFER_BIT);
+
+	gl->glViewport(eye == 1 ? w/2 : 0, 0, w/2, h);
+
+
 
 	sphere_shader->bind();
 
 	QMatrix4x4 modelview_matrix;
-	//modelview_matrix.rotate(psvr->GetRotationZ(), 0.0f, 0.0f, 1.0f);
-	//modelview_matrix.rotate(-psvr->GetRotationY(), 1.0f, 0.0f, 0.0f);
-	//modelview_matrix.rotate(-psvr->GetRotationX(), 0.0f, 1.0f, 0.0f);
 	modelview_matrix = psvr->GetModelViewMatrix();
 
 	QMatrix4x4 projection_matrix;
-	projection_matrix.perspective(fov, (float)width / (float)height, 0.1f, 100.0f);
+	projection_matrix.perspective(fov, ((float)(w/2)) / (float)h, 0.1f, 100.0f);
 	sphere_shader->setUniformValue("modelview_projection_uni", projection_matrix * modelview_matrix);
 
 	sphere_shader->setUniformValue("tex_uni", 0);
@@ -201,8 +231,27 @@ void HMDWidget::RenderEye(int eye, int width, int height)
 	else
 		sphere_shader->setUniformValue("min_max_uv_uni", 0.0f, 0.0f, 1.0f, 0.5f);
 
-	vao.bind();
+	cube_vao.bind();
 	gl->glDrawArrays(GL_TRIANGLES, 0, 6*6);
-	vao.release();
+	cube_vao.release();
 	sphere_shader->release();
+
+
+
+/*QOpenGLFramebufferObject::bindDefault();
+
+	gl->glViewport(eye == 1 ? w/2 : 0, 0, w/2, h);
+
+	distortion_shader->bind();
+	distortion_shader->setUniformValue("tex_uni", 0);
+	distortion_shader->setUniformValue("barrel_power_uni", barrel_power);
+
+	gl->glActiveTexture(GL_TEXTURE0);
+	gl->glBindTexture(GL_TEXTURE_2D, fbo->texture());
+
+	screen_vao.bind();
+	gl->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	screen_vao.release();
+
+	distortion_shader->release();*/
 }

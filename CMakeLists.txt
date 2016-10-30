@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD 11)
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(HIDAPI REQUIRED)
@@ -28,13 +29,18 @@ set(SOURCE_FILES
 		hmdwindow.cpp
 		hmdwindow.h
 		hmdwidget.cpp
-		hmdwidget.h videoplayer.cpp videoplayer.h)
+		hmdwidget.h
+		videoplayer.cpp
+		videoplayer.h)
 
 set(UI_FILES
 		mainwindow.ui)
 
+set(QRC_FILES
+		resources.qrc)
 
-add_executable(psvr ${SOURCE_FILES} ${UI_FILES})
+
+add_executable(psvr ${SOURCE_FILES} ${UI_FILES} ${QRC_FILES})
 qt5_use_modules(psvr Core Widgets Gui)
 target_link_libraries(psvr ${HIDAPI_LIBRARIES})
 target_link_libraries(psvr ${LIBVLC_LIBRARY})
