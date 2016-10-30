@@ -4,7 +4,6 @@
 #include <hidapi/hidapi.h>
 #include <cstdint>
 #include <cstring>
-#include <zconf.h>
 
 #include "psvr.h"
 

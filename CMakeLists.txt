@@ -18,29 +18,32 @@ include_directories(${HIDAPI_INCLUDE_DIRS})
 find_package(LIBVLC REQUIRED)
 include_directories(${LIBVLC_INCLUDE_DIR})
 
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+
 
 set(SOURCE_FILES
-		main.cpp
-		mainwindow.cpp
-		psvr.cpp
-		psvr.h
-		psvrthread.cpp
-		psvrthread.h
-		hmdwindow.cpp
-		hmdwindow.h
-		hmdwidget.cpp
-		hmdwidget.h
-		videoplayer.cpp
-		videoplayer.h)
+		src/main.cpp
+		include/mainwindow.h
+		src/mainwindow.cpp
+		src/psvr.cpp
+		include/psvr.h
+		src/psvrthread.cpp
+		include/psvrthread.h
+		src/hmdwindow.cpp
+		include/hmdwindow.h
+		src/hmdwidget.cpp
+		include/hmdwidget.h
+		src/videoplayer.cpp
+		include/videoplayer.h)
 
 set(UI_FILES
-		mainwindow.ui)
+		src/mainwindow.ui)
 
 set(QRC_FILES
 		resources.qrc)
 
 
-add_executable(psvr ${SOURCE_FILES} ${UI_FILES} ${QRC_FILES})
+add_executable(psvr ${UI_FILES} ${SOURCE_FILES}  ${QRC_FILES})
 qt5_use_modules(psvr Core Widgets Gui)
 target_link_libraries(psvr ${HIDAPI_LIBRARIES})
 target_link_libraries(psvr ${LIBVLC_LIBRARY})
