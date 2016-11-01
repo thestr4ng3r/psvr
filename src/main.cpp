@@ -17,6 +17,8 @@ int main(int argc, char *argv[])
 
 	QApplication app(argc, argv);
 
+	hid_init();
+
 	PSVR psvr;
 	PSVRThread *psvr_thread = new PSVRThread(&psvr);
 
@@ -41,6 +43,8 @@ int main(int argc, char *argv[])
 	int r = app.exec();
 
 	delete psvr_thread;
+
+	hid_exit();
 
 	return r;
 }

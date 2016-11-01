@@ -17,6 +17,14 @@ class HMDWidget : public QOpenGLWidget
 {
 	Q_OBJECT
 
+	public:
+		enum VideoProjectionMode
+		{
+			Monoscopic,
+			OverUnder,
+			SideBySide
+		};
+
 	private:
 		VideoPlayer *video_player;
 		PSVR *psvr;
@@ -40,6 +48,10 @@ class HMDWidget : public QOpenGLWidget
 		float fov;
 		float barrel_power;
 
+		int video_angle;
+		VideoProjectionMode video_projection_mode;
+		bool invert_stereo;
+
 		//void CreateFBO(int width, int height);
 		void UpdateTexture();
 		void RenderEye(int eye);
@@ -48,8 +60,17 @@ class HMDWidget : public QOpenGLWidget
 		HMDWidget(VideoPlayer *video_player, PSVR *psvr, QWidget *parent = 0);
 		~HMDWidget();
 
-		float GetFOV()						{ return fov; }
-		void SetFOV(float fov)				{ this->fov = fov; }
+		float GetFOV()											{ return fov; }
+		void SetFOV(float fov)									{ this->fov = fov; }
+
+		int GetVideoAngle()										{ return video_angle; }
+		void SetVideoAngle(int angle)							{ this->video_angle = angle; }
+
+		VideoProjectionMode GetVideoProjectionMode()			{ return video_projection_mode; }
+		void SetVideoProjectionMode(VideoProjectionMode mode)	{ this->video_projection_mode = mode; }
+
+		bool GetInvertStereo()									{ return invert_stereo; }
+		void SetInvertStereo(bool invert)						{ this->invert_stereo = invert; }
 
 	protected:
 		void initializeGL() Q_DECL_OVERRIDE;

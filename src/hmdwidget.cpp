@@ -14,6 +14,10 @@ HMDWidget::HMDWidget(VideoPlayer *video_player, PSVR *psvr, QWidget *parent) : Q
 	video_tex = 0;
 
 	fov = 80.0f;
+
+	video_angle = 360;
+	video_projection_mode = Monoscopic;
+	invert_stereo = false;
 }
 
 HMDWidget::~HMDWidget()
@@ -225,10 +229,26 @@ void HMDWidget::RenderEye(int eye)
 	sphere_shader->setUniformValue("tex_uni", 0);
 	video_tex->bind(0);
 
-	if(eye == 1)
-		sphere_shader->setUniformValue("min_max_uv_uni", 0.0f, 0.5f, 1.0f, 1.0f);
-	else
-		sphere_shader->setUniformValue("min_max_uv_uni", 0.0f, 0.0f, 1.0f, 0.5f);
+	int eye_inv = invert_stereo ? 1 - eye : eye;
+
+	switch(video_projection_mode)
+	{
+		case Monoscopic:
+			sphere_shader->setUniformValue("min_max_uv_uni", 0.0f, 0.0f, 1.0f, 1.0f);
+			break;
+		case OverUnder:
+			if(eye_inv == 1)
+				sphere_shader->setUniformValue("min_max_uv_uni", 0.0f, 0.5f, 1.0f, 1.0f);
+			else
+				sphere_shader->setUniformValue("min_max_uv_uni", 0.0f, 0.0f, 1.0f, 0.5f);
+			break;
+		case SideBySide:
+			if(eye_inv == 1)
+				sphere_shader->setUniformValue("min_max_uv_uni", 0.0f, 0.0f, 0.5f, 1.0f);
+			else
+				sphere_shader->setUniformValue("min_max_uv_uni", 0.5f, 0.0f, 1.0f, 1.0f);
+			break;
+	}
 
 	cube_vao.bind();
 	gl->glDrawArrays(GL_TRIANGLES, 0, 6*6);

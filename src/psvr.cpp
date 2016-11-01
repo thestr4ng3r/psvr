@@ -32,14 +32,55 @@ PSVR::~PSVR()
 
 void PSVR::Open()
 {
+	int res;
+	unsigned char buf[65];
+	#define MAX_STR 255
+	wchar_t wstr[MAX_STR];
+	hid_device *handle;
+	int i;
+
+	//char *path = 0;
+	//int w = 0;
+
+	// Enumerate and print the HID devices on the system
+	struct hid_device_info *devs, *cur_dev;
+
+	devs = hid_enumerate(0x0, 0x0);
+	cur_dev = devs;
+	while(cur_dev) {
+		printf("Device Found\n  type: %04hx %04hx\n  path: %s\n  serial_number: %ls",
+			   cur_dev->vendor_id, cur_dev->product_id, cur_dev->path, cur_dev->serial_number);
+		printf("\n");
+		printf("  Manufacturer: %ls\n", cur_dev->manufacturer_string);
+		printf("  Product:      %ls\n", cur_dev->product_string);
+		printf("\n");
+
+		/*if(cur_dev->vendor_id == PSVR_VENDOR_ID && cur_dev->product_id == PSVR_PRODUCT_ID)
+		{
+			if(w == 2)
+			{
+				path = cur_dev->path;
+			}
+
+			w++;
+		}*/
+
+		cur_dev = cur_dev->next;
+	}
+
+
+
+
 	psvr_device = hid_open(PSVR_VENDOR_ID, PSVR_PRODUCT_ID, 0);
+	//psvr_device = hid_open_path(path);
+	hid_free_enumeration(devs);
 	if(!psvr_device)
 	{
 		fprintf(stderr, "Failed to open PSVR HID device.\n");
 		return;
 	}
 
-	int r;
+	/*int r;
 	wchar_t wstr[MAX_STR];
 
 	r = hid_get_manufacturer_string(psvr_device, wstr, MAX_STR);
@@ -52,7 +93,7 @@ void PSVR::Open()
 
 	r = hid_get_serial_number_string(psvr_device, wstr, MAX_STR);
 	if(r > 0)
-		printf("SN: %ls\n", wstr);
+		printf("SN: %ls\n", wstr);*/
 
 	//hid_set_nonblocking(psvr_device, 1);
 }
@@ -73,7 +114,7 @@ bool PSVR::Read(int timeout)
 		return false;
 
 	int size = hid_read_timeout(psvr_device, buffer, PSVR_BUFFER_SIZE, timeout);
-
+	
 	if(size == 64)
 	{
 		x_acc = read_int16(buffer, 20) + read_int16(buffer, 36);
@@ -85,6 +126,10 @@ bool PSVR::Read(int timeout)
 		modelview_matrix.rotate(z_acc * ACCELERATION_COEF, QVector3D(0.0, 0.0, 1.0) * modelview_matrix);
 
 		return true;
+	}
+	else if(size < 0)
+	{
+		printf("read failed \"%S\"\n", hid_error(psvr_device));
 	}
 
 	return false;
