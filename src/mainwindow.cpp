@@ -47,7 +47,9 @@ MainWindow::~MainWindow()
 void MainWindow::SetHMDWindow(HMDWindow *hmd_window)
 {
 	this->hmd_window = hmd_window;
-	ui->FOVDoubleSpinBox->setValue(hmd_window->GetHMDWidget()->GetFOV());
+
+	if(hmd_window)
+		ui->FOVDoubleSpinBox->setValue(hmd_window->GetHMDWidget()->GetFOV());
 }
 
 void MainWindow::PSVRUpdate()
@@ -73,8 +75,11 @@ void MainWindow::OpenVideoFile()
 	if(file.isNull())
 		return;
 
-	if(!video_player->LoadVideo(file.toLocal8Bit().constData()))
+	if(!video_player->LoadVideo(QDir::toNativeSeparators(file).toLocal8Bit().constData()))
+	{
 		QMessageBox::critical(this, tr("PSVR Player"), tr("Failed to open video file."));
+		return;
+	}
 
 	ui->PlayerControlsWidget->setEnabled(true);
 }

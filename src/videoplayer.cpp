@@ -53,13 +53,18 @@ VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent)
 	media_player = 0;
 	event_manager = 0;
 
-	const char *vlc_argv[] =
+	/*const char *vlc_argv[] =
 		{
 			"--no-audio",
 			"--no-xlib"
-		};
+		};*/
 
-	libvlc = libvlc_new(2, vlc_argv);
+	libvlc = libvlc_new(0, 0); // vlc_argv);
+
+	if(!libvlc)
+	{
+		fprintf(stderr, "Failed to initialize LibVLC\n");
+	}
 }
 
 VideoPlayer::~VideoPlayer()
@@ -75,7 +80,10 @@ bool VideoPlayer::LoadVideo(const char *path)
 
 	media = libvlc_media_new_path(libvlc, path);
 	if(!media)
+	{
+		fprintf(stderr, "Failed to open video file \"%s\": %s\n", path, libvlc_errmsg());
 		return false;
+	}
 
 	media_player = libvlc_media_player_new_from_media(media);
 	if(!media_player)
@@ -110,7 +118,7 @@ void VideoPlayer::UnloadVideo()
 	if(media)
 		libvlc_media_release(media);
 
-	data_mutex.unlock();
+	//data_mutex.unlock();
 
 	media = 0;
 	media_player = 0;

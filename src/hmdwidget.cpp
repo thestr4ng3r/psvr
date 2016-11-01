@@ -106,7 +106,6 @@ void HMDWidget::initializeGL()
 	cube_vao.create();
 	cube_vao.bind();
 	sphere_shader->enableAttributeArray(0);
-	sphere_shader->enableAttributeArray(1);
 	sphere_shader->setAttributeBuffer(0, GL_FLOAT, 0, 3);
 
 	sphere_shader->release();
