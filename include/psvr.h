@@ -21,8 +21,12 @@ class PSVR
 		PSVR();
 		~PSVR();
 
-		void Open(const char *path = 0);
+		static hid_device_info *EnumerateDevices();
+
+		bool Open(const char *path = 0);
 		void Close();
+
+		bool IsOpen()					{ return psvr_device != 0; }
 
 		bool Read(int timeout);
 

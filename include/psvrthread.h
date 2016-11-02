@@ -14,13 +14,10 @@ class PSVRThread : public QThread
 
 	private:
 		PSVR *psvr;
-		bool running;
 
 	public:
 		PSVRThread(PSVR *psvr, QObject *parent = 0);
 		~PSVRThread();
-
-		void Stop(void)	{ running = false; }
 
 	signals:
 		void PSVRUpdate();

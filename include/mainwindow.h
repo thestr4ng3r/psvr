@@ -63,6 +63,8 @@ class MainWindow : public QMainWindow
 		void PlayerStopped();
 		void PlayerPositionChanged(float pos);
 
+		void UpdateVideoAngle();
+		void UpdateVideoProjection();
 
 	protected:
 		void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;

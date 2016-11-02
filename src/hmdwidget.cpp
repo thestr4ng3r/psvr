@@ -121,10 +121,10 @@ void HMDWidget::initializeGL()
 	video_tex->setFormat(QOpenGLTexture::RGB8_UNorm);
 	video_tex->setSize(1, 1);
 	video_tex->setMinMagFilters(QOpenGLTexture::Linear, QOpenGLTexture::Linear);
-	video_tex->allocateStorage(QOpenGLTexture::RGB, QOpenGLTexture::PixelType::UInt8);
+	video_tex->allocateStorage(QOpenGLTexture::BGR, QOpenGLTexture::PixelType::UInt8);
 	video_tex->bind();
 	unsigned char data[3] = { 0, 0, 0};
-	video_tex->setData(QOpenGLTexture::PixelFormat::RGB, QOpenGLTexture::PixelType::UInt8, (const void *)data);
+	video_tex->setData(QOpenGLTexture::PixelFormat::BGR, QOpenGLTexture::PixelType::UInt8, (const void *)data);
 
 
 	/*distortion_shader = new QOpenGLShaderProgram(this);
@@ -197,11 +197,11 @@ void HMDWidget::UpdateTexture()
 		video_tex->setFormat(QOpenGLTexture::RGB8_UNorm);
 		video_tex->setSize(video_player->GetWidth(), video_player->GetHeight());
 		video_tex->setMinMagFilters(QOpenGLTexture::Linear, QOpenGLTexture::Linear);
-		video_tex->allocateStorage(QOpenGLTexture::RGB, QOpenGLTexture::PixelType::UInt8);
+		video_tex->allocateStorage(QOpenGLTexture::BGR, QOpenGLTexture::PixelType::UInt8);
 	}
 
 	video_tex->bind();
-	video_tex->setData(QOpenGLTexture::PixelFormat::RGB, QOpenGLTexture::PixelType::UInt8, video_player->GetVideoData());
+	video_tex->setData(QOpenGLTexture::PixelFormat::BGR, QOpenGLTexture::PixelType::UInt8, video_player->GetVideoData());
 }
 
 void HMDWidget::RenderEye(int eye)

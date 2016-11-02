@@ -15,10 +15,7 @@ PSVRThread::~PSVRThread()
 
 void PSVRThread::run()
 {
-	running = true;
-	psvr->Open();
-
-	while(running)
+	while(!isInterruptionRequested())
 	{
 		if(psvr->Read(1))
 			emit PSVRUpdate();

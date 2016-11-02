@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
 	//video_player.LoadVideo("test.webm");
 
-	psvr_thread->start();
+	//psvr_thread->start();
 
 	int r = app.exec();
 

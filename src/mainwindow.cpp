@@ -44,6 +44,15 @@ MainWindow::MainWindow(VideoPlayer *video_player, PSVR *psvr, PSVRThread *psvr_t
 	connect(ui->FOVDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(FOVValueChanged(double)));
 	connect(ui->ResetViewButton, SIGNAL(clicked()), this, SLOT(ResetView()));
 
+	connect(ui->Angle360RadioButton, SIGNAL(toggled(bool)), this, SLOT(UpdateVideoAngle()));
+	connect(ui->Angle180RadioButton, SIGNAL(toggled(bool)), this, SLOT(UpdateVideoAngle()));
+	connect(ui->AngleCustomRadioButton, SIGNAL(toggled(bool)), this, SLOT(UpdateVideoAngle()));
+	connect(ui->AngleCustomSpinBox, SIGNAL(valueChanged(double)), this, SLOT(UpdateVideoAngle()));
+
+	connect(ui->StereoMonoscopicRadioButton, SIGNAL(toggled(bool)), this, SLOT(UpdateVideoProjection()));
+	connect(ui->StereoOverUnderRadioButton, SIGNAL(toggled(bool)), this, SLOT(UpdateVideoProjection()));
+	connect(ui->StereoSBSRadioButton, SIGNAL(toggled(bool)), this, SLOT(UpdateVideoProjection()));
+	connect(ui->StereoInvertCheckBox, SIGNAL(toggled(bool)), this, SLOT(UpdateVideoProjection()));
 
 	RefreshHIDDevices();
 }
@@ -62,6 +71,42 @@ void MainWindow::SetHMDWindow(HMDWindow *hmd_window)
 
 	if(hmd_window)
 		ui->FOVDoubleSpinBox->setValue(hmd_window->GetHMDWidget()->GetFOV());
+
+	HMDWidget *hmd_widget = hmd_window->GetHMDWidget();
+
+	switch(hmd_widget->GetVideoAngle())
+	{
+		case 360:
+			ui->Angle360RadioButton->setChecked(true);
+			ui->AngleCustomSpinBox->setEnabled(false);
+			break;
+		case 180:
+			ui->Angle180RadioButton->setChecked(true);
+			ui->AngleCustomSpinBox->setEnabled(false);
+			break;
+		default:
+			ui->AngleCustomRadioButton->setChecked(true);
+			ui->AngleCustomSpinBox->setEnabled(true);
+			ui->AngleCustomSpinBox->setValue(hmd_widget->GetVideoAngle());
+			break;
+	}
+
+	switch(hmd_widget->GetVideoProjectionMode())
+	{
+		case HMDWidget::Monoscopic:
+			ui->StereoMonoscopicRadioButton->setChecked(true);
+			ui->StereoInvertCheckBox->setEnabled(false);
+			break;
+		case HMDWidget::OverUnder:
+			ui->StereoOverUnderRadioButton->setChecked(true);
+			ui->StereoInvertCheckBox->setEnabled(true);
+			break;
+		case HMDWidget::SideBySide:
+			ui->StereoSBSRadioButton->setChecked(true);
+			ui->StereoInvertCheckBox->setEnabled(true);
+			break;
+	}
+
 }
 
 void MainWindow::RefreshHIDDevices()
@@ -69,12 +114,14 @@ void MainWindow::RefreshHIDDevices()
 	if(hid_device_infos)
 		hid_free_enumeration(hid_device_infos);
 
-	hid_device_infos = hid_enumerate(0x0, 0x0);
+	hid_device_infos = PSVR::EnumerateDevices();
 
 	QStringList items;
 	for(struct hid_device_info *dev = hid_device_infos; dev; dev=dev->next)
 	{
-		items.append(QString(dev->path));
+		QString s;		
+		s = QString::asprintf("%ls %ls (%s)", dev->manufacturer_string, dev->product_string, dev->path);
+		items.append(s);
 	}
 
 	ui->HIDDevicesListWidget->clear();
@@ -83,6 +130,38 @@ void MainWindow::RefreshHIDDevices()
 
 void MainWindow::ConnectPSVR()
 {
+	if(psvr_thread->isRunning())
+	{
+		psvr_thread->requestInterruption();
+		psvr_thread->wait();
+		ui->ConnectHIDDeviceButton->setText(tr("Connect"));
+		return;
+	}
+
+	int index = ui->HIDDevicesListWidget->currentRow();
+	if(index < 0)
+		return;
+
+	hid_device_info *dev = hid_device_infos;
+	for(int i = 0; i < index; i++)
+	{
+		if(!dev)
+			break;
+		dev = dev->next;
+	}
+
+	if(!dev)
+		return;
+
+	if(psvr->Open(dev->path))
+	{
+		psvr_thread->start();
+		ui->ConnectHIDDeviceButton->setText(tr("Disconnect"));
+	}
+	else
+	{
+		QMessageBox::critical(this, tr("PSVR Player"), tr("Failed to connect to HID device."));
+	}
 }
 
 void MainWindow::PSVRUpdate()
@@ -178,6 +257,50 @@ void MainWindow::UIPlayerPositionChangedDelayed()
 	}
 }
 
+void MainWindow::UpdateVideoAngle()
+{
+	HMDWidget *hmd_widget = hmd_window->GetHMDWidget();
+
+	if(ui->Angle360RadioButton->isChecked())
+	{
+		hmd_widget->SetVideoAngle(360);
+		ui->AngleCustomSpinBox->setEnabled(false);
+	}
+	else if(ui->Angle180RadioButton->isChecked())
+	{
+		hmd_widget->SetVideoAngle(180);
+		ui->AngleCustomSpinBox->setEnabled(false);
+	}
+	else if(ui->AngleCustomRadioButton->isChecked())
+	{
+		hmd_widget->SetVideoAngle((int)ui->AngleCustomSpinBox->value());
+		ui->AngleCustomSpinBox->setEnabled(true);
+	}
+}
+
+void MainWindow::UpdateVideoProjection()
+{
+	HMDWidget *hmd_widget = hmd_window->GetHMDWidget();
+
+	if(ui->StereoMonoscopicRadioButton->isChecked())
+	{
+		hmd_widget->SetVideoProjectionMode(HMDWidget::Monoscopic);
+		ui->StereoInvertCheckBox->setEnabled(false);
+	}
+	else if(ui->StereoOverUnderRadioButton->isChecked())
+	{
+		hmd_widget->SetVideoProjectionMode(HMDWidget::OverUnder);
+		hmd_widget->SetInvertStereo(ui->StereoInvertCheckBox->isChecked());
+		ui->StereoInvertCheckBox->setEnabled(true);
+	}
+	else if(ui->StereoSBSRadioButton->isChecked())
+	{
+		hmd_widget->SetVideoProjectionMode(HMDWidget::SideBySide);
+		hmd_widget->SetInvertStereo(ui->StereoInvertCheckBox->isChecked());
+		ui->StereoInvertCheckBox->setEnabled(true);
+	}
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
 	if(event->key() == Qt::Key_R)
@@ -192,7 +315,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-	psvr_thread->Stop();
+	psvr_thread->requestInterruption();
 	psvr_thread->wait();
 
 	if(hmd_window)
