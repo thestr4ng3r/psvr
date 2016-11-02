@@ -1,3 +1,5 @@
+#version 330
+
 /*
  * Created by Florian Märkl <info@florianmaerkl.de>
  *
@@ -15,8 +17,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#version 330
 
 #define M_PI 3.1415926535897932384626433832795
 
