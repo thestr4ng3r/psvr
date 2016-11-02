@@ -4,6 +4,7 @@
 
 uniform sampler2D tex_uni;
 uniform vec4 min_max_uv_uni;
+uniform float projection_angle_factor_uni;
 
 in vec3 position_var;
 
@@ -20,9 +21,21 @@ void main(void)
 	if(dir_h.x > 0.0)
 		sphere_coord.x = 1.0 - sphere_coord.x;
 
-	vec2 uv = min_max_uv_uni.xy + (min_max_uv_uni.zw - min_max_uv_uni.xy) * sphere_coord;
+	sphere_coord.x -= 0.5;
+	sphere_coord.x *= projection_angle_factor_uni;
+	sphere_coord.x += 0.5;
 
-	//vec3 color = vec3(mod(position_var.x, 0.2), mod(position_var.y, 0.2), mod(position_var.z, 0.2));
-	vec3 color = texture(tex_uni, uv).rgb;
+	vec3 color;
+
+	if(sphere_coord.x < 0.0 || sphere_coord.x > 1.0)
+	{
+		color = vec3(0.0);
+	}
+	else
+	{
+		vec2 uv = min_max_uv_uni.xy + (min_max_uv_uni.zw - min_max_uv_uni.xy) * sphere_coord;
+		color = texture(tex_uni, uv).rgb;
+	}
+
 	color_out = vec4(color, 1.0);
 }

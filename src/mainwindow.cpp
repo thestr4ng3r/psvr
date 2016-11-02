@@ -120,7 +120,9 @@ void MainWindow::RefreshHIDDevices()
 	for(struct hid_device_info *dev = hid_device_infos; dev; dev=dev->next)
 	{
 		QString s;		
-		s = QString::asprintf("%ls %ls (%s)", dev->manufacturer_string, dev->product_string, dev->path);
+		QTextStream(&s) << QString::fromWCharArray(dev->manufacturer_string) << " "
+						<< QString::fromWCharArray(dev->product_string)
+						<< " (" << QString::fromLocal8Bit(dev->path) << ")";
 		items.append(s);
 	}
 

@@ -250,6 +250,8 @@ void HMDWidget::RenderEye(int eye)
 			break;
 	}
 
+	sphere_shader->setUniformValue("projection_angle_factor_uni", 360.0f / (float)video_angle);
+
 	cube_vao.bind();
 	gl->glDrawArrays(GL_TRIANGLES, 0, 6*6);
 	cube_vao.release();

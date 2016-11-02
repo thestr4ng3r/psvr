@@ -53,13 +53,13 @@ VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent)
 	media_player = 0;
 	event_manager = 0;
 
-	/*const char *vlc_argv[] =
+	const char *vlc_argv[] =
 		{
-			"--no-audio",
-			"--no-xlib"
-		};*/
+			"--no-xlib",
+			"--verbose=2"
+		};
 
-	libvlc = libvlc_new(0, 0); // vlc_argv);
+	libvlc = libvlc_new(2, vlc_argv); // vlc_argv);
 
 	if(!libvlc)
 	{
