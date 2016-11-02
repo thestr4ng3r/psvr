@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(psvr)
+project(psvr
+		VERSION 1.0.0)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -42,6 +43,9 @@ set(UI_FILES
 set(QRC_FILES
 		resources.qrc)
 
+
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/project_version.h.in" "${CMAKE_CURRENT_BINARY_DIR}/project_version.h")
 
 add_executable(psvr ${UI_FILES} ${SOURCE_FILES}  ${QRC_FILES})
 qt5_use_modules(psvr Core Widgets Gui)

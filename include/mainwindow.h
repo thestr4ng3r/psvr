@@ -66,6 +66,8 @@ class MainWindow : public QMainWindow
 		void UpdateVideoAngle();
 		void UpdateVideoProjection();
 
+		void SetRGBWorkaround(bool enabled);
+
 	protected:
 		void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
 		void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;

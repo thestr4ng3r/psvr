@@ -52,6 +52,8 @@ class HMDWidget : public QOpenGLWidget
 		VideoProjectionMode video_projection_mode;
 		bool invert_stereo;
 
+		bool rgb_workaround;
+
 		//void CreateFBO(int width, int height);
 		void UpdateTexture();
 		void RenderEye(int eye);
@@ -71,6 +73,8 @@ class HMDWidget : public QOpenGLWidget
 
 		bool GetInvertStereo()									{ return invert_stereo; }
 		void SetInvertStereo(bool invert)						{ this->invert_stereo = invert; }
+
+		void SetRGBWorkaround(bool enabled)						{ this->rgb_workaround = enabled; }
 
 	protected:
 		void initializeGL() Q_DECL_OVERRIDE;

@@ -7,8 +7,12 @@
 #include "mainwindow.h"
 #include "hmdwindow.h"
 
+#include "project_version.h"
+
 int main(int argc, char *argv[])
 {
+	printf("PSVR Player Version %s\n", PROJECT_VERSION);
+
 	QSurfaceFormat format;
 	format.setMajorVersion(3);
 	format.setMinorVersion(3);

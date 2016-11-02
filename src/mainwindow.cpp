@@ -9,6 +9,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "project_version.h"
+
 MainWindow::MainWindow(VideoPlayer *video_player, PSVR *psvr, PSVRThread *psvr_thread, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	this->video_player = video_player;
@@ -19,6 +21,8 @@ MainWindow::MainWindow(VideoPlayer *video_player, PSVR *psvr, PSVRThread *psvr_t
 	hid_device_infos = 0;
 
 	ui->setupUi(this);
+
+	setWindowTitle(windowTitle() + " " + QString(PROJECT_VERSION));
 
 	player_position_delay_timer.setInterval(16);
 	player_position_delay_timer.setSingleShot(true);
@@ -54,6 +58,8 @@ MainWindow::MainWindow(VideoPlayer *video_player, PSVR *psvr, PSVRThread *psvr_t
 	connect(ui->StereoSBSRadioButton, SIGNAL(toggled(bool)), this, SLOT(UpdateVideoProjection()));
 	connect(ui->StereoInvertCheckBox, SIGNAL(toggled(bool)), this, SLOT(UpdateVideoProjection()));
 
+	connect(ui->RGBWorkaroundCheckBox, SIGNAL(toggled(bool)), this, SLOT(SetRGBWorkaround(bool)));
+
 	RefreshHIDDevices();
 }
 
@@ -69,8 +75,10 @@ void MainWindow::SetHMDWindow(HMDWindow *hmd_window)
 {
 	this->hmd_window = hmd_window;
 
-	if(hmd_window)
-		ui->FOVDoubleSpinBox->setValue(hmd_window->GetHMDWidget()->GetFOV());
+	if(!hmd_window)
+		return;
+		
+	ui->FOVDoubleSpinBox->setValue(hmd_window->GetHMDWidget()->GetFOV());
 
 	HMDWidget *hmd_widget = hmd_window->GetHMDWidget();
 
@@ -301,6 +309,11 @@ void MainWindow::UpdateVideoProjection()
 		hmd_widget->SetInvertStereo(ui->StereoInvertCheckBox->isChecked());
 		ui->StereoInvertCheckBox->setEnabled(true);
 	}
+}
+
+void MainWindow::SetRGBWorkaround(bool enabled)
+{
+	hmd_window->GetHMDWidget()->SetRGBWorkaround(enabled);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
