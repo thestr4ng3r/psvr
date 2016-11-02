@@ -23,6 +23,8 @@ class MainWindow : public QMainWindow
 	private:
 		Ui::MainWindow *ui;
 
+		struct hid_device_info *hid_device_infos;
+
 		PSVRThread *psvr_thread;
 
 		VideoPlayer *video_player;
@@ -40,6 +42,9 @@ class MainWindow : public QMainWindow
 		void SetHMDWindow(HMDWindow *hmd_window);
 
 	protected slots:
+		void RefreshHIDDevices();
+		void ConnectPSVR();
+
 		void PSVRUpdate();
 		void FOVValueChanged(double v);
 

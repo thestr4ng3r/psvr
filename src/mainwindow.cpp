@@ -14,7 +14,9 @@ MainWindow::MainWindow(VideoPlayer *video_player, PSVR *psvr, PSVRThread *psvr_t
 	this->video_player = video_player;
 	this->psvr = psvr;
 	this->psvr_thread = psvr_thread;
-	this->hmd_window = 0;
+
+	hmd_window = 0;
+	hid_device_infos = 0;
 
 	ui->setupUi(this);
 
@@ -29,6 +31,10 @@ MainWindow::MainWindow(VideoPlayer *video_player, PSVR *psvr, PSVRThread *psvr_t
 	connect(video_player, SIGNAL(Paused()), this, SLOT(PlayerPaused()));
 	connect(video_player, SIGNAL(Stopped()), this, SLOT(PlayerStopped()));
 
+
+	connect(ui->RefreshHIDDevicesButton, SIGNAL(clicked()), this, SLOT(RefreshHIDDevices()));
+	connect(ui->ConnectHIDDeviceButton, SIGNAL(clicked()), this, SLOT(ConnectPSVR()));
+
 	connect(ui->OpenButton, SIGNAL(clicked()), this, SLOT(OpenVideoFile()));
 
 	connect(ui->PlayButton, SIGNAL(clicked()), this, SLOT(UIPlayerPlay()));
@@ -37,11 +43,17 @@ MainWindow::MainWindow(VideoPlayer *video_player, PSVR *psvr, PSVRThread *psvr_t
 
 	connect(ui->FOVDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(FOVValueChanged(double)));
 	connect(ui->ResetViewButton, SIGNAL(clicked()), this, SLOT(ResetView()));
+
+
+	RefreshHIDDevices();
 }
 
 MainWindow::~MainWindow()
 {
 	delete ui;
+
+	if(hid_device_infos)
+		hid_free_enumeration(hid_device_infos);
 }
 
 void MainWindow::SetHMDWindow(HMDWindow *hmd_window)
@@ -50,6 +62,27 @@ void MainWindow::SetHMDWindow(HMDWindow *hmd_window)
 
 	if(hmd_window)
 		ui->FOVDoubleSpinBox->setValue(hmd_window->GetHMDWidget()->GetFOV());
+}
+
+void MainWindow::RefreshHIDDevices()
+{
+	if(hid_device_infos)
+		hid_free_enumeration(hid_device_infos);
+
+	hid_device_infos = hid_enumerate(0x0, 0x0);
+
+	QStringList items;
+	for(struct hid_device_info *dev = hid_device_infos; dev; dev=dev->next)
+	{
+		items.append(QString(dev->path));
+	}
+
+	ui->HIDDevicesListWidget->clear();
+	ui->HIDDevicesListWidget->addItems(items);
+}
+
+void MainWindow::ConnectPSVR()
+{
 }
 
 void MainWindow::PSVRUpdate()

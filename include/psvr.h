@@ -21,7 +21,7 @@ class PSVR
 		PSVR();
 		~PSVR();
 
-		void Open();
+		void Open(const char *path = 0);
 		void Close();
 
 		bool Read(int timeout);

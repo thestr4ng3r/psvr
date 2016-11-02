@@ -30,7 +30,7 @@ PSVR::~PSVR()
 {
 }
 
-void PSVR::Open()
+void PSVR::Open(const char *path)
 {
 	int res;
 	unsigned char buf[65];
@@ -68,12 +68,14 @@ void PSVR::Open()
 		cur_dev = cur_dev->next;
 	}
 
-
-
-
-	psvr_device = hid_open(PSVR_VENDOR_ID, PSVR_PRODUCT_ID, 0);
-	//psvr_device = hid_open_path(path);
 	hid_free_enumeration(devs);
+
+
+	if(path)
+		psvr_device = hid_open_path(path);
+	else
+		psvr_device = hid_open(PSVR_VENDOR_ID, PSVR_PRODUCT_ID, 0);
+
 	if(!psvr_device)
 	{
 		fprintf(stderr, "Failed to open PSVR HID device.\n");
