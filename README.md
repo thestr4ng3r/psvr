@@ -1,4 +1,6 @@
 # PSVR Player
+**Disclaimer:** This project is not endorsed or certified by Sony Interactive Entertainment LLC.
+
 This is a cross-platform 3D 360/180 video player for the Playstation VR headset. It uses libvlc to stream videos to OpenGL in order to display them on the headset. For rotational tracking, it reads the data from the HID device using hidapi. A GUI is provided using Qt 5. It has been tested on Windows and Linux so far.
 
 This project has been made possible after emoRaivis found out how to get the tracking data from PSVR and developed the app MacMorpheus, which is essentially the same as this project, but as an exclusive Mac application. It is available here: https://github.com/emoRaivis/MacMorpheus. A big thanks to him!
