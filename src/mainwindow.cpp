@@ -209,7 +209,7 @@ void MainWindow::ResetView()
 
 void MainWindow::OpenVideoFile()
 {
-	QString file = QFileDialog::getOpenFileName(this, tr("Open Video"), QDir::currentPath(), tr("All files (*)"), Q_NULLPTR, QFileFialog::DontUseNativeDialog);
+	QString file = QFileDialog::getOpenFileName(this, tr("Open Video"), QDir::currentPath(), tr("All files (*)"), Q_NULLPTR, QFileDialog::DontUseNativeDialog);
 
 	if(file.isNull())
 		return;
